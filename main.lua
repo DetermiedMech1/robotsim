@@ -13,15 +13,39 @@ function love.load()
         down = "s",
         rotateL = "left",
         rotateR = "right",
+        forward = "up",
+        backward = "down"
     }
 end
 
+local function moveOnLine(x, y, speed)
+
+end
+
 function love.update()
-    Player.x = Player.x + (love.keyboard.isDown(Keys.left) and -Player.moveSpeed or 0) + (love.keyboard.isDown(Keys.right) and Player.moveSpeed or 0)
-    Player.y = Player.y + (love.keyboard.isDown(Keys.up) and -Player.moveSpeed or 0) + (love.keyboard.isDown(Keys.down) and Player.moveSpeed or 0)
+    --move based off udlr keys
+    Player.x = (
+        Player.x + (
+            (love.keyboard.isDown(Keys.left) and -1 or 0) +
+            (love.keyboard.isDown(Keys.right) and 1 or 0)
+        ) * Player.moveSpeed
+    ) 
+    Player.y = (
+        Player.y + (
+            (love.keyboard.isDown(Keys.up) and -1 or 0) +
+            (love.keyboard.isDown(Keys.down) and 1 or 0)
+        ) * Player.moveSpeed
+    )
+    --change angle 
     Player.angle = Player.angle > 2*math.pi and 0 or Player.angle
     Player.angle = Player.angle < 0 and 2*math.pi or Player.angle
-    Player.angle = Player.angle + ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Player.turnSpeed
+
+    Player.angle = Player.angle + (
+        (love.keyboard.isDown(Keys.rotateL) and -1 or 0) +
+        (love.keyboard.isDown(Keys.rotateR) and 1 or 0)
+    ) * Player.turnSpeed
+
+    --move towards direction the square is facing
 end
 
 function love.draw()
