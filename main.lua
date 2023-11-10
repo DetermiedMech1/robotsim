@@ -1,11 +1,28 @@
 function love.load()
+    function createRectangle(width, height, angle, centerX, centerY)
+        local imgdata = love.image.newImageData(1, 1, 'rgba8', '\xff\xff\xff\xff')
+        local img = love.graphics.newImage(imgdata)
+        return {
+            x = centerX,
+            y = centerY,
+            width = width,
+            height = height,
+            angle = angle,
+            draw = function(self)
+                love.graphics.draw(img, self.x, self.y, self.angle, self.width, self.height, 0.5, 0.5)
+            end
+        }
+    end
+
     Player = {
         x = 0,
         y = 0,
         moveSpeed = 5,
         angle = 0,
         turnSpeed = 0.1,
+        size = 50,
     }
+
     Keys = {
         left = "a",
         right = "d",
@@ -16,43 +33,36 @@ function love.load()
         forward = "up",
         backward = "down"
     }
+
+    -- Create the player rectangle
+    Player.body = createRectangle(Player.size, Player.size, Player.angle, Player.x, Player.y)
 end
 
-local function moveOnLine(x, y, speed)
+function love.update(dt)
+    -- Move based on arrow keys
+    Player.x = Player.x + (
+        (love.keyboard.isDown(Keys.left) and -1 or 0) +
+        (love.keyboard.isDown(Keys.right) and 1 or 0)
+    ) * Player.moveSpeed
 
-end
+    Player.y = Player.y + (
+        (love.keyboard.isDown(Keys.up) and -1 or 0) +
+        (love.keyboard.isDown(Keys.down) and 1 or 0)
+    ) * Player.moveSpeed
 
-function love.update()
-    --move based off udlr keys
-    Player.x = (
-        Player.x + (
-            (love.keyboard.isDown(Keys.left) and -1 or 0) +
-            (love.keyboard.isDown(Keys.right) and 1 or 0)
-        ) * Player.moveSpeed
-    ) 
-    Player.y = (
-        Player.y + (
-            (love.keyboard.isDown(Keys.up) and -1 or 0) +
-            (love.keyboard.isDown(Keys.down) and 1 or 0)
-        ) * Player.moveSpeed
-    )
-    --change angle 
-    Player.angle = Player.angle > 2*math.pi and 0 or Player.angle
-    Player.angle = Player.angle < 0 and 2*math.pi or Player.angle
+    -- Change angle
+    Player.angle = Player.angle + ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Player.turnSpeed
 
-    Player.angle = Player.angle + (
-        (love.keyboard.isDown(Keys.rotateL) and -1 or 0) +
-        (love.keyboard.isDown(Keys.rotateR) and 1 or 0)
-    ) * Player.turnSpeed
+    -- Keep angle within [0, 2*pi)
+    Player.angle = Player.angle % (2 * math.pi)
 
-    --move towards direction the square is facing
+    -- Update the player rectangle's properties
+    Player.body.x = Player.x
+    Player.body.y = Player.y
+    Player.body.angle = Player.angle
 end
 
 function love.draw()
-    love.graphics.push()
-        love.graphics.translate(Player.x, Player.y)
-        love.graphics.rotate(Player.angle)
-        love.graphics.rectangle("line", -25, -25, 50, 50)
-        love.graphics.line(0,0 , 0,-100)
-    love.graphics.pop()
+    -- Draw the player rectangle
+    Player.body.draw(Player.body)
 end
