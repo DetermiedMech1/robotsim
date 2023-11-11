@@ -31,11 +31,37 @@ function love.load()
         rotateL = "left",
         rotateR = "right",
         forward = "up",
-        backward = "down"
+        backward = "down",
     }
 
     -- Create the player rectangle
     Player.body = createRectangle(Player.size, Player.size, Player.angle, Player.x, Player.y)
+
+    Wheels = {
+        FR = {
+            x = Player.x,
+            y = Player.y,
+            angle = Player.angle,
+        },
+        FL = {
+            x = Player.x,
+            y = Player.y,
+            angle = Player.angle,
+        },
+        BR = {
+            x = Player.x,
+            y = Player.y,
+            angle = Player.angle,
+        },
+        BL = {
+            x = Player.x,
+            y = Player.y,
+            angle = Player.angle,
+        },
+    }
+    for k, v in pairs(Wheels) do
+        v.body = createRectangle(100, 20, v.angle, v.x, v.y)
+    end
 end
 
 function love.update(dt)
@@ -60,9 +86,18 @@ function love.update(dt)
     Player.body.x = Player.x
     Player.body.y = Player.y
     Player.body.angle = Player.angle
+
+    --wheel
+    for k, v in pairs(Wheels) do
+        v.body.x, v.body.y = Player.x, Player.y
+        v.body.angle = Player.angle
+    end
 end
 
 function love.draw()
     -- Draw the player rectangle
-    Player.body.draw(Player.body)
+    Player.body:draw()
+    for k, v in pairs(Wheels) do
+        v.body:draw()
+    end
 end
