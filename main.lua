@@ -2,6 +2,9 @@ function love.load()
     love.physics.setMeter(64) -- 1 meter = 64 pixels
     world = love.physics.newWorld(0, 0, true)
 
+    screenHeight, screenWidth = love.graphics.getDimensions()
+    screenCenterX, screenCenterY = screenHeight/2, screenWidth/2
+
     Robot = {
         x = 0,
         y = 0,
@@ -34,6 +37,7 @@ function love.load()
         rotateR = "right",
         forward = "up",
         backward = "down",
+        reset = "space"
     }
 end
 
@@ -64,6 +68,15 @@ function love.update(dt)
         (love.keyboard.isDown(Keys.up) and -1 or 0) +
         (love.keyboard.isDown(Keys.down) and 1 or 0)
     ) * Robot.moveSpeed
+
+    if love.keyboard.isDown(Keys.reset) then
+        Robot.body:setPosition(screenCenterX, screenCenterY)
+        Robot.body:setLinearVelocity(0,0)
+        Robot.body:setAngularVelocity(0,0)
+        Robot.body:setAngle(0)
+    end
+
+
 
     Robot.body:applyForce(forceX * Robot.moveSpeed, forceY * Robot.moveSpeed)
 
