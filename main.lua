@@ -18,6 +18,8 @@ function love.load()
     Robot.body = love.physics.newBody(world, Robot.x, Robot.y, "dynamic")
     Robot.shape = love.physics.newRectangleShape(Robot.size, Robot.size)
     Robot.fixture = love.physics.newFixture(Robot.body, Robot.shape)
+    Robot.body:setLinearDamping(10)
+    Robot.body:setAngularDamping(10)
 
     -- Create the wheels
     Wheels = {
