@@ -1,6 +1,9 @@
 function love.load()
     love.physics.setMeter(64) -- 1 meter = 64 pixels
     world = love.physics.newWorld(0, 0, true)
+    
+    controllers = love.joystick.getJoysticks()
+    controllerDeadzone = 0.5
 
     screenHeight, screenWidth = love.graphics.getDimensions()
     screenCenterX, screenCenterY = screenHeight/2, screenWidth/2
@@ -41,6 +44,12 @@ function love.load()
         backward = "down",
         reset = "space"
     }
+
+end
+
+function xboxController(n)
+    controller = controllers[n]
+    return controller:getAxes()
 end
 
 function createSwerveModule(world, body, offsetX, offsetY)
@@ -57,10 +66,17 @@ function updateSwerveModule(module, angle)
     module.joint:setLimits(angle, angle)
 end
 
+function rotateSwerveModule(module, angle)
+    module.body:setAngle(angle)
+end
+
 function love.update(dt)
+    jsX1, jsY1, jsX2, jsY2 = xboxController(1)
+
     world:update(dt)
         
     -- Move based on arrow keys
+    --[[
     local forceX = (
         (love.keyboard.isDown(Keys.left) and -1 or 0) +
         (love.keyboard.isDown(Keys.right) and 1 or 0)
@@ -70,6 +86,7 @@ function love.update(dt)
         (love.keyboard.isDown(Keys.up) and -1 or 0) +
         (love.keyboard.isDown(Keys.down) and 1 or 0)
     ) * Robot.moveSpeed
+    ---]]
 
     if love.keyboard.isDown(Keys.reset) then
         Robot.body:setPosition(screenCenterX, screenCenterY)
@@ -77,13 +94,18 @@ function love.update(dt)
         Robot.body:setAngularVelocity(0,0)
         Robot.body:setAngle(0)
     end
-
-
-
+    ---[[
+    local forceX, forceY = (math.abs(jsX1) > controllerDeadzone and jsX1 * Robot.moveSpeed or 0), (math.abs(jsY1) > controllerDeadzone and jsY1 * Robot.moveSpeed or 0)
+    ---]]
     Robot.body:applyForce(forceX * Robot.moveSpeed, forceY * Robot.moveSpeed)
 
     -- Change angle
+    --[[
     local torque = ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Robot.turnSpeed
+    ---]]
+    ---[[
+    local torque = jsX2 * Robot.turnSpeed
+    ---]]
     Robot.body:applyTorque(torque)
 
     -- Keep angle within [0, 2*pi)
@@ -95,6 +117,11 @@ function love.update(dt)
     updateSwerveModule(Wheels.FL, Robot.body:getAngle())
     updateSwerveModule(Wheels.BR, Robot.body:getAngle())
     updateSwerveModule(Wheels.BL, Robot.body:getAngle())
+
+    rotateSwerveModule(Wheels.FR, math.pi/8)
+    rotateSwerveModule(Wheels.FL, math.pi/8)
+    rotateSwerveModule(Wheels.BR, math.pi/8)
+    rotateSwerveModule(Wheels.BL, math.pi/8)
 end
 
 function love.draw()
