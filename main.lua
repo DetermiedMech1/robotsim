@@ -1,28 +1,30 @@
 function love.load()
-    function createRectangle(width, height, angle, centerX, centerY)
-        local imgdata = love.image.newImageData(1, 1, 'rgba8', '\xff\xff\xff\xff')
-        local img = love.graphics.newImage(imgdata)
-        return {
-            x = centerX,
-            y = centerY,
-            width = width,
-            height = height,
-            angle = angle,
-            draw = function(self)
-                love.graphics.draw(img, self.x, self.y, self.angle, self.width, self.height, 0.5, 0.5)
-            end
-        }
-    end
+    love.physics.setMeter(64) -- 1 meter = 64 pixels
+    world = love.physics.newWorld(0, 0, true)
 
-    Player = {
+    Robot = {
         x = 0,
         y = 0,
-        moveSpeed = 5,
+        moveSpeed = 50,
         angle = 0,
-        turnSpeed = 0.1,
+        turnSpeed = 10000,
         size = 50,
     }
 
+    -- Create the robot body
+    Robot.body = love.physics.newBody(world, Robot.x, Robot.y, "dynamic")
+    Robot.shape = love.physics.newRectangleShape(Robot.size, Robot.size)
+    Robot.fixture = love.physics.newFixture(Robot.body, Robot.shape)
+
+    -- Create the wheels
+    Wheels = {
+        FR = createSwerveModule(world, Robot.body, -Robot.size/2, Robot.size/2),
+        FL = createSwerveModule(world, Robot.body, Robot.size/2, Robot.size/2),
+        BR = createSwerveModule(world, Robot.body, -Robot.size/2, -Robot.size/2),
+        BL = createSwerveModule(world, Robot.body, Robot.size/2, -Robot.size/2),
+    }
+
+    -- Set up arrow keys
     Keys = {
         left = "a",
         right = "d",
@@ -33,71 +35,59 @@ function love.load()
         forward = "up",
         backward = "down",
     }
+end
 
-    -- Create the player rectangle
-    Player.body = createRectangle(Player.size, Player.size, Player.angle, Player.x, Player.y)
+function createSwerveModule(world, body, offsetX, offsetY)
+    local module = {}
+    module.body = love.physics.newBody(world, Robot.x + offsetX, Robot.y + offsetY, "dynamic")
+    module.shape = love.physics.newRectangleShape(20, 40)
+    module.fixture = love.physics.newFixture(module.body, module.shape)
+    module.joint = love.physics.newRevoluteJoint(body, module.body, Robot.x + offsetX, Robot.y + offsetY, false)
 
-    Wheels = {
-        FR = {
-            x = Player.x,
-            y = Player.y,
-            angle = Player.angle,
-        },
-        FL = {
-            x = Player.x,
-            y = Player.y,
-            angle = Player.angle,
-        },
-        BR = {
-            x = Player.x,
-            y = Player.y,
-            angle = Player.angle,
-        },
-        BL = {
-            x = Player.x,
-            y = Player.y,
-            angle = Player.angle,
-        },
-    }
-    for k, v in pairs(Wheels) do
-        v.body = createRectangle(100, 20, v.angle, v.x, v.y)
-    end
+    return module
+end
+
+function updateSwerveModule(module, angle)
+    module.joint:setLimits(angle, angle)
 end
 
 function love.update(dt)
+    world:update(dt)
+        
     -- Move based on arrow keys
-    Player.x = Player.x + (
+    local forceX = (
         (love.keyboard.isDown(Keys.left) and -1 or 0) +
         (love.keyboard.isDown(Keys.right) and 1 or 0)
-    ) * Player.moveSpeed
+    ) * Robot.moveSpeed
 
-    Player.y = Player.y + (
+    local forceY = (
         (love.keyboard.isDown(Keys.up) and -1 or 0) +
         (love.keyboard.isDown(Keys.down) and 1 or 0)
-    ) * Player.moveSpeed
+    ) * Robot.moveSpeed
+
+    Robot.body:applyForce(forceX * Robot.moveSpeed, forceY * Robot.moveSpeed)
 
     -- Change angle
-    Player.angle = Player.angle + ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Player.turnSpeed
+    local torque = ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Robot.turnSpeed
+    Robot.body:applyTorque(torque)
 
     -- Keep angle within [0, 2*pi)
-    Player.angle = Player.angle % (2 * math.pi)
+    local angle = Robot.body:getAngle()
+    Robot.body:setAngle(angle % (2 * math.pi))
 
-    -- Update the player rectangle's properties
-    Player.body.x = Player.x
-    Player.body.y = Player.y
-    Player.body.angle = Player.angle
-
-    --wheel
-    for k, v in pairs(Wheels) do
-        v.body.x, v.body.y = Player.x, Player.y
-        v.body.angle = Player.angle
-    end
+    -- Update the swerve modules
+    updateSwerveModule(Wheels.FR, Robot.body:getAngle())
+    updateSwerveModule(Wheels.FL, Robot.body:getAngle())
+    updateSwerveModule(Wheels.BR, Robot.body:getAngle())
+    updateSwerveModule(Wheels.BL, Robot.body:getAngle())
 end
 
 function love.draw()
-    -- Draw the player rectangle
-    Player.body:draw()
+    -- Draw the wheels
     for k, v in pairs(Wheels) do
-        v.body:draw()
+        love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
     end
+
+    -- Draw the robot
+    love.graphics.polygon("fill", Robot.body:getWorldPoints(Robot.shape:getPoints()))
 end
