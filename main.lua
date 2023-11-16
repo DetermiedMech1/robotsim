@@ -66,7 +66,7 @@ function updateSwerveModule(module, angle)
     module.joint:setLimits(angle, angle)
 end
 
-function rotateSwerveModule(module, robotAngularVelocity, dt)
+function rotateSwerveModule(module, dt)
     -- Calculate the linear velocity of the module's contact point
     local moduleLinearVelocityX, moduleLinearVelocityY = module.body:getLinearVelocityFromLocalPoint(0, 0)
 
@@ -142,12 +142,10 @@ function love.update(dt)
     updateSwerveModule(Wheels.BR, Robot.body:getAngle())
     updateSwerveModule(Wheels.BL, Robot.body:getAngle())
 
-    if Robot.body:getAngularVelocity() ~= 0 then
-        rotateSwerveModule(Wheels.FR, Robot.body:getAngularVelocity(), dt)
-        rotateSwerveModule(Wheels.FL, Robot.body:getAngularVelocity(), dt)
-        rotateSwerveModule(Wheels.BR, Robot.body:getAngularVelocity(), dt)
-        rotateSwerveModule(Wheels.BL, Robot.body:getAngularVelocity(), dt)
-    end
+    rotateSwerveModule(Wheels.FR, dt)
+    rotateSwerveModule(Wheels.FL, dt)
+    rotateSwerveModule(Wheels.BR, dt)
+    rotateSwerveModule(Wheels.BL, dt)
 end
 
 function love.draw()
