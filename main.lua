@@ -89,12 +89,12 @@ end
 
 
 function love.update(dt)
-    --jsX1, jsY1, jsX2, jsY2 = xboxController(1)
+    jsX1, jsY1, jsX2, jsY2 = xboxController(1)
 
     world:update(dt)
         
     -- Move based on arrow keys
-    ---[[
+    --[[
     local forceX = (
         (love.keyboard.isDown(Keys.left) and -1 or 0) +
         (love.keyboard.isDown(Keys.right) and 1 or 0)
@@ -105,7 +105,7 @@ function love.update(dt)
         (love.keyboard.isDown(Keys.down) and 1 or 0)
     ) * Robot.moveSpeed
     ---]]
-    --[[
+    ---[[
     local forceX, forceY = (math.abs(jsX1) > controllerDeadzone and jsX1 * Robot.moveSpeed or 0), (math.abs(jsY1) > controllerDeadzone and jsY1 * Robot.moveSpeed or 0)
     ---]]
 
@@ -124,10 +124,10 @@ function love.update(dt)
     Robot.body:applyForce(forceX * Robot.moveSpeed, forceY * Robot.moveSpeed)
 
     -- Change angle
-    ---[[
+    --[[
     local torque = ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Robot.turnSpeed
     ---]]
-    --[[
+    ---[[
     local torque = jsX2 * Robot.turnSpeed
     ---]]
     Robot.body:applyTorque(torque)
