@@ -142,10 +142,12 @@ function love.update(dt)
     updateSwerveModule(Wheels.BR, Robot.body:getAngle())
     updateSwerveModule(Wheels.BL, Robot.body:getAngle())
 
-    rotateSwerveModule(Wheels.FR, Robot.body:getAngularVelocity(), dt)
-    rotateSwerveModule(Wheels.FL, Robot.body:getAngularVelocity(), dt)
-    rotateSwerveModule(Wheels.BR, Robot.body:getAngularVelocity(), dt)
-    rotateSwerveModule(Wheels.BL, Robot.body:getAngularVelocity(), dt)
+    if Robot.body:getAngularVelocity() ~= 0 then
+        rotateSwerveModule(Wheels.FR, Robot.body:getAngularVelocity(), dt)
+        rotateSwerveModule(Wheels.FL, Robot.body:getAngularVelocity(), dt)
+        rotateSwerveModule(Wheels.BR, Robot.body:getAngularVelocity(), dt)
+        rotateSwerveModule(Wheels.BL, Robot.body:getAngularVelocity(), dt)
+    end
 end
 
 function love.draw()
