@@ -32,7 +32,7 @@ function love.load()
         BL = createSwerveModule(world, Robot.body, Robot.size/2, -Robot.size/2),
     }
 
-    -- Set up arrow keys
+    -- Set up keys
     Keys = {
         left = "a",
         right = "d",
@@ -89,12 +89,18 @@ end
 
 
 function love.update(dt)
-    --jsX1, jsY1, jsX2, jsY2 = xboxController(1)
-
     world:update(dt)
+    --uncomment to enable Xbox controller controls
+    --i don't know how to make it not error so this
+    --is my current solution
+    --
+    --uncomment other controller code related comments
+    --to make those work too
+
+    --jsX1, jsY1, jsX2, jsY2 = xboxController(1)
         
-    -- Move based on arrow keys
-    ---[[
+    --comment to turn off the keyboard controlls
+    
     local forceX = (
         (love.keyboard.isDown(Keys.left) and -1 or 0) +
         (love.keyboard.isDown(Keys.right) and 1 or 0)
@@ -104,10 +110,10 @@ function love.update(dt)
         (love.keyboard.isDown(Keys.up) and -1 or 0) +
         (love.keyboard.isDown(Keys.down) and 1 or 0)
     ) * Robot.moveSpeed
-    ---]]
-    --[[
-    local forceX, forceY = (math.abs(jsX1) > controllerDeadzone and jsX1 * Robot.moveSpeed or 0), (math.abs(jsY1) > controllerDeadzone and jsY1 * Robot.moveSpeed or 0)
-    ---]]
+
+    --uncomment to turn on the controller controls
+ 
+    --local forceX, forceY = (math.abs(jsX1) > controllerDeadzone and jsX1 * Robot.moveSpeed or 0), (math.abs(jsY1) > controllerDeadzone and jsY1 * Robot.moveSpeed or 0)
 
     if love.keyboard.isDown(Keys.reset) then
         Robot.body:setPosition(screenCenterX, screenCenterY)
@@ -124,12 +130,13 @@ function love.update(dt)
     Robot.body:applyForce(forceX * Robot.moveSpeed, forceY * Robot.moveSpeed)
 
     -- Change angle
-    ---[[
+    -- comment this to turn off keyboard controls
     local torque = ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Robot.turnSpeed
     ---]]
-    --[[
-    local torque = (math.abs(jsX2) > controllerDeadzone and jsX2 * Robot.turnSpeed or 0)
-    ---]]
+ 
+    --uncomment this to turn on controller controls
+    --local torque = (math.abs(jsX2) > controllerDeadzone and jsX2 * Robot.turnSpeed or 0)
+  
     Robot.body:applyTorque(torque)
 
     -- Keep angle within [0, 2*pi)
