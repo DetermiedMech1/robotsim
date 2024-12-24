@@ -132,7 +132,6 @@ function love.update(dt)
     -- Change angle
     -- comment this to turn off keyboard controls
     local torque = ((love.keyboard.isDown(Keys.rotateL) and -1 or 0) + (love.keyboard.isDown(Keys.rotateR) and 1 or 0)) * Robot.turnSpeed
-    ---]]
  
     --uncomment this to turn on controller controls
     --local torque = (math.abs(jsX2) > controllerDeadzone and jsX2 * Robot.turnSpeed or 0)
